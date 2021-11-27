@@ -29,11 +29,21 @@ Graph generate_graph(int v, int e, std::mt19937 &gen) {
 
     std::unordered_set<int> sample;
 
-    int var, N = v*v;
-    for (int r = N - e; r < N; ++r) {
-        var = std::uniform_int_distribution<>(0, r)(gen);
-        if (!sample.insert(var).second)
-            sample.insert(r);
+    const int q = e / (v-1);
+    int r = e % (v-1);
+    int var, N, de;
+    for (int i = 0; i < v-1; ++i) {
+        N = (i+1)*v + i + 1;
+        de = q;
+        if (r > 0) {
+            de++;
+            r--;
+        }
+        for (int s = N - de; s < N; ++s) {
+            var = std::uniform_int_distribution<>(i*v+(i+1), s)(gen);
+            if (!sample.insert(var).second)
+                sample.insert(s);
+        }
     }
 
     Graph g(v, e);
@@ -56,17 +66,15 @@ class SCC {
 
 public:
 
-    Graph *graph;
+    Graph * const graph;
 
-    explicit SCC(Graph &g) : low_links(g.v, -1), index(g.v, -1), on_stack(g.v, false) {
-        graph = &g;
-    }
+    explicit SCC(Graph &g) : graph(&g), low_links(g.v, -1), index(g.v, -1), on_stack(g.v, false) {}
 
     std::vector<std::vector<int>> get_strongly_connected_components() {
         int node;
         for (const auto& element: *graph) {
             node = element.first;
-            if (low_links[node] == -1)
+            if (index[node] == -1)
                 search_component(node);
         }
         return strongly_connected_components;
@@ -94,7 +102,7 @@ private:
             successors = (*graph)[node];
 
         for (int successor : successors) {
-            if (low_links[successor] == -1) {
+            if (index[successor] == -1) {
                 search_component(successor);
                 low_links[node] = std::min(low_links[node], low_links[successor]);
             }
@@ -106,14 +114,12 @@ private:
 
             std::vector<int> connected_component;
             int successor;
-            while (true) {
+            do {
                 successor = stack.top();
                 stack.pop();
                 on_stack[successor] = false;
                 connected_component.push_back(successor);
-                if (successor == node)
-                    break;
-            }
+            } while (successor != node);
             strongly_connected_components.push_back(connected_component);
         }
     }
@@ -123,9 +129,9 @@ int main() {
 
     int NUMBER_OF_TESTS, MAX_VERTICES;
 
-    std::cout << "Input number of tests: ";
+    std::cout << "Input number of tests:";
     std::cin >> NUMBER_OF_TESTS;
-    std::cout << "\nInput maximum number of vertices: ";
+    std::cout << "Input maximum number of vertices:";
     std::cin >> MAX_VERTICES;
 
     std::random_device rd;
