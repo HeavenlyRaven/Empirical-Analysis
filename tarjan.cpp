@@ -18,7 +18,7 @@ public:
         e = ne;
     }
 
-    bool in_graph(int node) const {
+    bool has_successors(int node) const {
 
         return (this->find(node) != this->end());
     }
@@ -52,7 +52,7 @@ Graph generate_graph(int v, int e, std::mt19937 &gen) {
     for(int n: sample) {
         u = n / v;
         w = n % v;
-        if (g.in_graph(u))
+        if (g.has_successors(u))
             g[u].insert(w);
         else {
             std::unordered_set<int> successors({w});
@@ -98,7 +98,7 @@ private:
         on_stack[node] = true;
 
         std::unordered_set<int> successors;
-        if (graph->in_graph(node))
+        if (graph->has_successors(node))
             successors = (*graph)[node];
 
         for (int successor : successors) {
