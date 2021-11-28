@@ -145,7 +145,7 @@ int main() {
 
     for (int k = 0; k < NUMBER_OF_TESTS; ++k) {
         v = std::uniform_int_distribution<>(2, MAX_VERTICES)(gen);
-        e = std::uniform_int_distribution<>(v, v*(v-1))(gen);
+        e = std::uniform_int_distribution<>(v-1, v*(v-1))(gen);
         Graph G = generate_graph(v, e, gen);
         auto start = std::chrono::steady_clock::now();
         std::vector<std::vector<int>> scc = SCC(G).get_strongly_connected_components();
